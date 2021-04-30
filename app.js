@@ -1,20 +1,52 @@
 import { html } from "htm/preact";
-import { ButtonCounter } from "./button-counter";
+import { useState } from "preact/hooks";
+
+import { IncidentSummary } from "./incident-summary";
 
 export const App = () => {
-  const onChildClicked = e => {
-    console.log("callback from parent triggered", e);
+  const [incidents, setIncidents] = useState([
+    {
+      id: 1,
+      description: "Something happened"
+    },
+    {
+      id: 2,
+      description: "Something happened in Namibia"
+    },
+    {
+      id: 3,
+      description: "Something happened in Botswana"
+    }
+  ]);
+
+  const deleteIncident = id => {
+    setIncidents(incidents => incidents.filter(i => i.id != id));
+  };
+  const updateIncident = id => event => {
+    setIncidents(incidents => {
+      const incidentIndex = incidents.findIndex(i => i.id == id);
+      return [
+        ...incidents.slice(0, incidentIndex),
+        { ...incidents[incidentIndex], description: event.target.value },
+        ...incidents.slice(incidentIndex + 1)
+      ];
+    });
   };
 
   return html`
     <div class="container pt-2">
-      <h1>Preact htm Starter Template</h1>
-
-      <p>
-        Simple Preact htm Template with a custom ButtonCounter Component
-      </p>
-
-      <${ButtonCounter} name="Preact htm" onClicked=${e => onChildClicked(e)} />
+      <h1>Incidents</h1>
+      ${incidents.map(
+        i =>
+          html`
+            <${IncidentSummary}
+              incident=${i}
+              key=${i.id}
+              deleteIncident=${deleteIncident}
+              updateIncident=${updateIncident}
+            />
+          `
+      )}
     </div>
   `;
 };
